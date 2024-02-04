@@ -37,6 +37,7 @@ export class Bot {
         this.client.on('message', (message: Message) => {
             this.saveMessage(message);
         });
+        this.logger.info('Bot initialised successfully');
     }
 
     getMessageMetadata(message: Message): Record<string, any> {
@@ -85,6 +86,7 @@ export class Bot {
         message: string,
         message_id?: string,
     ): Promise<void> {
+        this.logger.info(`Sending message to chat ${chatId}`, { message });
         if (message_id) {
             this.client.sendMessage(chatId, message, {
                 reply_to_message_id: Number(message_id),
