@@ -31,7 +31,7 @@ export class Bot {
         this.client.onText(/\/(start|help)/, (message: Message) => {
             this.help(message);
         });
-        this.client.onText(/\/(search)/, (message: Message) => {
+        this.client.onText(/\/search (.+)/, (message: Message) => {
             this.help(message);
         });
         this.client.on('message', (message: Message) => {
@@ -111,11 +111,13 @@ export class Bot {
     }
 
     async search(message: Message): Promise<void> {
+        const regex = new RegExp(/\/search/);
         const { chatId, message_content, message_id } =
             this.getMessageMetadata(message);
         try {
+            const query = message_content.replace(regex, '').trim();
             const response = await this.apiClient.get('/messages/search', {
-                message_content,
+                message_content: query,
             });
             const data = response;
             const { documents } = data;
