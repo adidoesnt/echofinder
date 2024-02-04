@@ -3,6 +3,7 @@ import Client, { type Message } from 'node-telegram-bot-api';
 import { Logger } from 'components/logger';
 import { MESSAGE } from 'constants/message';
 import { ERROR } from 'constants/error';
+import { ApiClient } from './apiClient';
 
 const { TELEGRAM_BOT_TOKEN: token = '', NODE_ENV: env = 'DEV' } = process.env;
 
@@ -10,9 +11,11 @@ export class Bot {
     private static instance: Bot;
     protected client: Client;
     protected logger: Log4js;
+    private apiClient: ApiClient;
 
     protected constructor() {
         this.client = new Client(token, { polling: env === 'DEV' });
+        this.apiClient = ApiClient.getInstance();
         this.logger = Logger.getLogger('Bot');
     }
 
@@ -64,6 +67,11 @@ export class Bot {
 
     async saveMessage(message: Message): Promise<void> {
         const metadata = this.getMessageMetadata(message);
-        this.logger.info(metadata);
+        this.logger.info(`Saving message with metadata ${metadata}`);
+        try {
+            await this.apiClient.post('/messages', metadata);
+        } catch (error) {
+            this.logger.error(error);
+        }
     }
 }
