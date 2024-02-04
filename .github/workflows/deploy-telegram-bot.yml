@@ -50,7 +50,7 @@ jobs:
         run: cd telegram-bot && docker push registry.heroku.com/echofinder-telegram/web
 
       - name: Set environment variables
-        run: cd telegram-bot && heroku config:set TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} NODE_ENV=${{ env.NODE_ENV }} BACKEND_HOST=${{ env.BACKEND_HOST }} BACKEND_PORT=${{ env.BACKEND_PORT }} BACKEND_API_KEY=${{ secrets.BACKEND_API_KEY }} API_CLIENT_TIMEOUT=${{ env.API_CLIENT_TIMEOUT }} PLATFORM=${{ env.PLATFORM }} --app echofinder-telegram
+        run: cd telegram-bot && heroku config:set TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} TELEGRAM_BOT_WEBHOOK_URL=${{ secrets.TELEGRAM_BOT_WEBHOOK_URL }} NODE_ENV=${{ secrets.NODE_ENV }} BACKEND_HOST=${{ secrets.BACKEND_HOST }} BACKEND_PORT=${{ secrets.BACKEND_PORT }} BACKEND_API_KEY=${{ secrets.BACKEND_API_KEY }} API_CLIENT_TIMEOUT=${{ secrets.API_CLIENT_TIMEOUT }} PLATFORM=${{ secrets.PLATFORM }} --app echofinder-telegram
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
