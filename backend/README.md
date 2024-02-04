@@ -22,3 +22,8 @@
     http://127.0.0.1:8080/docs
     ```
    This URL will open the FastAPI interactive documentation (Swagger UI) where you can explore and test the API endpoints.
+
+
+## Delete DB
+
+`python3 delete_db.py`
