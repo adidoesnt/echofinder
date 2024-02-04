@@ -13,9 +13,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
+
       - name: Login to Heroku Container Registry
-        run: docker login --username=${{ secrets.HEROKU_EMAIL }} --password=$HEROKU_API_KEY registry.heroku.com
+        run: heroku container:login
         env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+      - name: Check if Heroku app exists
+        id: check_app
+        run: |
+          if heroku apps:info echofinder-telegram > /dev/null 2>&1; then
+            echo "App exists"
+            echo "::set-output name=exists::true"
+          else
+            echo "App does not exist"
+            echo "::set-output name=exists::false"
+          fi
+        env:
+          HEROKU_APP_NAME: echofinder-telegram
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+      - name: Create Heroku app
+        if: steps.check_app.outputs.exists == 'false'
+        run: heroku apps:create echofinder-telegram
+        env:
+          HEROKU_APP_NAME: echofinder-telegram
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
       - name: Build Docker image
