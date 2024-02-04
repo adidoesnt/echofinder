@@ -1,15 +1,12 @@
 import { type Message } from 'whatsapp-web.js';
 import { WhatsApp } from 'components/whatsapp';
-
-const { BOT_CHAT_IDS = '', DEBUG_MODE = 'TRUE' } = process.env;
+import { MESSAGE } from 'constants/message';
 
 export class Bot extends WhatsApp {
     private static instance: Bot;
-    private chatIds: Array<string>;
 
     private constructor() {
         super();
-        this.chatIds = `${BOT_CHAT_IDS}`.split(',');
     }
 
     static getInstance() {
@@ -19,23 +16,24 @@ export class Bot extends WhatsApp {
         return Bot.instance;
     }
 
-    private validateChatId(chatId: string) {
-        if (DEBUG_MODE.toUpperCase() === 'TRUE') return true;
-        if (!chatId) {
-            this.logger.warn('Chat ID is required');
-            return false;
-        } else if (typeof chatId !== 'string' && typeof chatId !== 'number') {
-            this.logger.warn('chatId must be a string or number');
-            return false;
-        } else if (this.chatIds.includes(chatId)) {
-            this.logger.warn('Chat ID does not match bot configuration');
-            return false;
+    protected async processMessage(message: Message) {
+        this.logger.info('received whatsapp message', message);
+        const { text } = this.getMessageMetadata(message);
+        const tokens = text.split(' ');
+        const command = tokens[0];
+        let reply: string = "";
+        switch (command) {
+            case '/start':
+            case '/help':
+                reply = MESSAGE.HELP;
+                break;
+            default:
+                await this.saveMessage(message);
         }
-        return true;
     }
 
-    protected async processMessage(message: Message) {
-        if (!this.validateChatId(message.from)) return;
-        this.logger.info('Received whatsapp message', message);
+    async saveMessage(message: Message): Promise<void> {
+        const metadata = this.getMessageMetadata(message);
+        this.logger.info(metadata);
     }
 }
