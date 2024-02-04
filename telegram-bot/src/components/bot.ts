@@ -5,6 +5,7 @@ import { MESSAGE } from 'constants/message';
 import { ERROR } from 'constants/error';
 import { ApiClient } from './apiClient';
 import { commands } from 'constants/command';
+import type { Request, Response } from 'express';
 
 const {
     TELEGRAM_BOT_TOKEN: token = '',
@@ -32,10 +33,14 @@ export class Bot {
         return Bot.instance;
     }
 
+    setWebhook(): void {
+        this.client.setWebHook(webhook_url + token);
+    }
+
     initialize(): void {
         this.logger.info('Initialising bot');
         this.client.setMyCommands(commands);
-        if (env !== 'DEV') this.client.setWebHook(webhook_url);
+        if (env !== 'DEV') this.setWebhook();
         this.client.onText(/\/(start|help)/, (message: Message) => {
             this.help(message);
         });
@@ -150,5 +155,10 @@ export class Bot {
         } catch (error) {
             this.logger.error(error);
         }
+    }
+
+    processUpdate(req: Request, response: Response) {
+        this.client.processUpdate(req.body);
+        response.status(200).json({ message: MESSAGE.PROCESSING_UPDATE });
     }
 }
