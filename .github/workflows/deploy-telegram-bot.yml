@@ -12,8 +12,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+    
+      - name: Checkout subdirectory
+        run: cd telegram-bot
 
-      - name: Build, Push and Release Docker container to Heroki. 
+      - name: Build, Push and Release Docker container to Heroku 
         uses: gonuit/heroku-docker-deploy@v1.3.3
         with:
           email: ${{ secrets.HEROKU_EMAIL }}
