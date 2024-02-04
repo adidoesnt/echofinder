@@ -1,8 +1,8 @@
 import { Client, type Message } from 'whatsapp-web.js';
 import { type Logger as Log4js } from 'log4js';
 import { Logger } from 'components/logger';
-import { generate } from 'qrcode-terminal';
-import { launch } from 'puppeteer';
+import qrcode from 'qrcode-terminal';
+import puppeteer from 'puppeteer';
 
 export class WhatsApp {
     protected client: Client;
@@ -16,7 +16,7 @@ export class WhatsApp {
     protected registerEvents() {
         this.client.on('qr', (qr) => {
             this.logger.info('received whatsapp qr code', qr);
-            generate(qr, { small: true });
+            qrcode.generate(qr, { small: true });
         });
         this.client.on('authenticated', (session) => {
             this.logger.info('successfully authenticated session', session);
@@ -36,7 +36,7 @@ export class WhatsApp {
     }
 
     async initialize() {
-        await launch({ headless: true });
+        await puppeteer.launch({ headless: true });
         this.registerEvents();
         await this.client.initialize();
     }
