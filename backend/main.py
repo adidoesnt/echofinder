@@ -30,7 +30,7 @@ async def upsert_messages(messages: List[TelegramMessage]):
 
     ids = [msg.message_id for msg in messages]
     documents = [msg.message_content for msg in messages]
-    metadatas = [{"sender_id": msg.sender_id, "chat_id": msg.chat_id, "firstname": msg.firstname, "lastname": msg.lastname,
+    metadatas = [{"sender_id": msg.sender_id, "chat_id": msg.chat_id, "name": msg.firstname, "lastname": msg.lastname if msg.lastname else "",
                   "sent_at": msg.sent_at.strftime("%Y-%m-%d %H:%M:%S")} for msg in messages]
 
     collection.upsert(ids=ids, metadatas=metadatas, documents=documents)
