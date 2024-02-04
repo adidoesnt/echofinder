@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 import chromadb
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -17,7 +17,7 @@ class TelegramMessage(BaseModel):
     message_id: str
     username: str
     firstname: str
-    lastname: str
+    lastname: Optional[str] = None
     sender_id: str
     chat_id: str
     message_content: str
