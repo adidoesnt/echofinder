@@ -95,7 +95,7 @@ export class WhatsApp {
         return metadata;
     }
 
-    protected async processMessage(message: Message) {
+    protected async processMessage(message: Message): Promise<Message | undefined> {
         const { chatId } = this.getMessageMetadata(message);
         if (!this.validateChatId(chatId)) return;
         this.logger.info('Received whatsapp message', message);

@@ -18,7 +18,7 @@ export class Bot extends WhatsApp {
 
     protected async processMessage(message: Message) {
         this.logger.info('received whatsapp message', message);
-        const { text } = this.getMessageMetadata(message);
+        const { text, chatId, messageId } = this.getMessageMetadata(message);
         const tokens = text.split(' ');
         const command = tokens[0];
         let reply: string = "";
@@ -29,6 +29,14 @@ export class Bot extends WhatsApp {
                 break;
             default:
                 await this.saveMessage(message);
+        }
+        if (reply.trim() !== "") {
+            this.logger.info("sending reply", reply);
+            return await this.client.sendMessage(chatId, reply, {
+                quotedMessageId: messageId,
+            });
+        } else {
+            return;
         }
     }
 
