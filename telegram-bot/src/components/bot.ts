@@ -8,6 +8,7 @@ import { commands } from 'constants/command';
 
 const {
     TELEGRAM_BOT_TOKEN: token = '',
+    TELEGRAM_BOT_WEBHOOK_URL: webhook_url = '',
     NODE_ENV: env = 'DEV',
     PLATFORM: message_type = 'telegram',
 } = process.env;
@@ -34,6 +35,7 @@ export class Bot {
     initialize(): void {
         this.logger.info('Initialising bot');
         this.client.setMyCommands(commands);
+        if (env !== 'DEV') this.client.setWebHook(webhook_url);
         this.client.onText(/\/(start|help)/, (message: Message) => {
             this.help(message);
         });
