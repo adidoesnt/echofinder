@@ -79,9 +79,10 @@ export class WhatsApp {
     }
 
     protected getMessageMetadata(message: Message): MessageMetadata {
-        const { from, body, timestamp, id, author, notifyName } =
-            message as Message & { notifyName: string };
-        const { id: messageId } = id;
+        const { from, body, timestamp, id, author, _data } =
+            message as Message & { _data: { notifyName: string } };
+        const { _serialized: messageId } = id;
+        const { notifyName } = _data;
         const { firstName, lastName } = this.getFullName(notifyName);
         let metadata = {
             text: body,
@@ -95,7 +96,9 @@ export class WhatsApp {
         return metadata;
     }
 
-    protected async processMessage(message: Message): Promise<Message | undefined> {
+    protected async processMessage(
+        message: Message,
+    ): Promise<Message | undefined> {
         const { chatId } = this.getMessageMetadata(message);
         if (!this.validateChatId(chatId)) return;
         this.logger.info('Received whatsapp message', message);

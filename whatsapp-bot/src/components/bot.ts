@@ -22,6 +22,7 @@ export class Bot extends WhatsApp {
         const tokens = text.split(' ');
         const command = tokens[0];
         let reply: string = "";
+        console.log({ text, chatId, messageId });
         switch (command) {
             case '/start':
             case '/help':
