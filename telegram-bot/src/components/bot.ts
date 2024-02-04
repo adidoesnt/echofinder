@@ -31,6 +31,9 @@ export class Bot {
         this.client.onText(/\/(start|help)/, (message: Message) => {
             this.help(message);
         });
+        this.client.onText(/\/(search)/, (message: Message) => {
+            this.help(message);
+        });
         this.client.on('message', (message: Message) => {
             this.saveMessage(message);
         });
@@ -71,7 +74,28 @@ export class Bot {
         this.client.sendMessage(chatId, MESSAGE.HELP);
     }
 
+    validateMesssage(message: Message): boolean {
+        const { text } = this.getMessageMetadata(message);
+        const regex = new RegExp(/\/(start|help|search)/);
+        return !regex.test(text);
+    }
+
+    async sendMessage(
+        chatId: string,
+        message: string,
+        message_id?: string,
+    ): Promise<void> {
+        if (message_id) {
+            this.client.sendMessage(chatId, message, {
+                reply_to_message_id: Number(message_id),
+            });
+        } else {
+            this.client.sendMessage(chatId, message);
+        }
+    }
+
     async saveMessage(message: Message): Promise<void> {
+        if (!this.validateMesssage(message)) return;
         const metadata = this.getMessageMetadata(message);
         this.logger.info(
             `Saving message with metadata:`,
@@ -79,6 +103,27 @@ export class Bot {
         );
         try {
             await this.apiClient.post('/messages', [metadata]);
+        } catch (error) {
+            this.logger.error(error);
+        }
+    }
+
+    async search(message: Message): Promise<void> {
+        const { chatId, message_content, message_id } =
+            this.getMessageMetadata(message);
+        try {
+            const response = await this.apiClient.get('/messages/search', {
+                message_content,
+            });
+            const data = response;
+            const { documents } = data;
+            const results = documents
+                .map((doc: string, i: number) => {
+                    const index = i + 1;
+                    return `${index}. ${doc}`;
+                })
+                .join('\n');
+            this.sendMessage(chatId, results, message_id);
         } catch (error) {
             this.logger.error(error);
         }
