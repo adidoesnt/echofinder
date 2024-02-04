@@ -32,7 +32,7 @@ export class Bot {
             this.help(message);
         });
         this.client.onText(/\/search (.+)/, (message: Message) => {
-            this.help(message);
+            this.search(message);
         });
         this.client.on('message', (message: Message) => {
             this.saveMessage(message);
@@ -71,12 +71,12 @@ export class Bot {
     }
 
     async help(message: Message) {
-        const { chatId } = this.getMessageMetadata(message);
-        this.client.sendMessage(chatId, MESSAGE.HELP);
+        const { chat_id } = this.getMessageMetadata(message);
+        await this.sendMessage(chat_id, MESSAGE.HELP);
     }
 
     validateMesssage(message: Message): boolean {
-        const { text } = this.getMessageMetadata(message);
+        const { message_content: text } = this.getMessageMetadata(message);
         const regex = new RegExp(/\/(start|help|search)/);
         return !regex.test(text);
     }
@@ -112,12 +112,12 @@ export class Bot {
 
     async search(message: Message): Promise<void> {
         const regex = new RegExp(/\/search/);
-        const { chatId, message_content, message_id } =
+        const { chat_id, message_content, message_id } =
             this.getMessageMetadata(message);
         try {
             const query = message_content.replace(regex, '').trim();
             const response = await this.apiClient.get('/messages/search', {
-                message_content: query,
+                search_string: query,
             });
             const data = response;
             const { documents } = data;
@@ -127,7 +127,7 @@ export class Bot {
                     return `${index}. ${doc}`;
                 })
                 .join('\n');
-            this.sendMessage(chatId, results, message_id);
+            this.sendMessage(chat_id, results, message_id);
         } catch (error) {
             this.logger.error(error);
         }
