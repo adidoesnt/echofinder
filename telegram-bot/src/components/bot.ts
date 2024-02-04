@@ -6,7 +6,11 @@ import { ERROR } from 'constants/error';
 import { ApiClient } from './apiClient';
 import { commands } from 'constants/command';
 
-const { TELEGRAM_BOT_TOKEN: token = '', NODE_ENV: env = 'DEV' } = process.env;
+const {
+    TELEGRAM_BOT_TOKEN: token = '',
+    NODE_ENV: env = 'DEV',
+    PLATFORM: message_type = 'telegram',
+} = process.env;
 
 export class Bot {
     private static instance: Bot;
@@ -32,9 +36,6 @@ export class Bot {
         this.client.setMyCommands(commands);
         this.client.onText(/\/(start|help)/, (message: Message) => {
             this.help(message);
-        });
-        this.client.onText(/\/search/, (message: Message) => {
-            this.prompt(message);
         });
         this.client.onText(/\/search (.+)/, (message: Message) => {
             this.search(message);
@@ -67,6 +68,7 @@ export class Bot {
                 firstname,
                 lastname,
                 username,
+                message_type,
             };
         } else {
             const error = new Error(ERROR.NO_FROM);
@@ -126,6 +128,7 @@ export class Bot {
             this.getMessageMetadata(message);
         try {
             const query = message_content.replace(regex, '').trim();
+            console.log('query', query);
             const response = await this.apiClient.get('/messages/search', {
                 search_string: query,
             });
@@ -137,6 +140,10 @@ export class Bot {
                     return `${index}. ${doc}`;
                 })
                 .join('\n');
+            if (!results || results.length === 0) {
+                await this.sendMessage(chat_id, MESSAGE.NO_RESULTS, message_id);
+                return;
+            }
             this.sendMessage(chat_id, results, message_id);
         } catch (error) {
             this.logger.error(error);
