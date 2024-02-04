@@ -40,19 +40,25 @@ export class Bot {
         const { text, chat, date, message_id, from } = message;
         const { id } = chat;
         let metadata: Record<string, any> = {
-            text,
-            chatId: id,
-            date,
-            messageId: message_id,
+            message_content: text,
+            chat_id: `${id}`,
+            sent_at: new Date(date).toISOString(),
+            message_id: `${message_id}`,
         };
         if (from) {
             const {
-                id: userId,
-                first_name: firstName,
-                last_name: lastName,
+                id: sender_id,
+                first_name: firstname,
+                last_name: lastname,
                 username,
             } = from;
-            metadata = { ...metadata, userId, firstName, lastName, username };
+            metadata = {
+                ...metadata,
+                sender_id: `${sender_id}`,
+                firstname,
+                lastname,
+                username,
+            };
         } else {
             const error = new Error(ERROR.NO_FROM);
             this.logger.error(error);
@@ -67,9 +73,12 @@ export class Bot {
 
     async saveMessage(message: Message): Promise<void> {
         const metadata = this.getMessageMetadata(message);
-        this.logger.info(`Saving message with metadata ${metadata}`);
+        this.logger.info(
+            `Saving message with metadata:`,
+            JSON.stringify(metadata),
+        );
         try {
-            await this.apiClient.post('/messages', metadata);
+            await this.apiClient.post('/messages', [metadata]);
         } catch (error) {
             this.logger.error(error);
         }
