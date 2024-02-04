@@ -57,6 +57,8 @@ async def search_messages(search_string: str = Query(..., min_length=1)):
         n_results=5
         )
     
+    results["documents"] = results["documents"][0]
+    
     return results
 
 
