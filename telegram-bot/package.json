@@ -1,21 +1,22 @@
 {
-    "name": "echofinder-telegram",
-    "module": "src/index.ts",
-    "type": "module",
-    "scripts": {
-        "format": "prettier --write .",
-        "start": "bun run src/index.ts",
-        "dev": "bun run --hot src/index.ts"
-    },
-    "devDependencies": {
-        "@types/bun": "latest",
-        "@types/node-telegram-bot-api": "^0.64.2",
-        "prettier": "^3.2.5"
-    },
-    "peerDependencies": {
-        "typescript": "^5.0.0"
-    },
-    "dependencies": {
-        "node-telegram-bot-api": "^0.64.0"
-    }
+  "name": "echofinder-telegram",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write .",
+    "start": "bun run src/index.ts",
+    "dev": "bun run --hot src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node-telegram-bot-api": "^0.64.2",
+    "prettier": "^3.2.5"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "log4js": "^6.9.1",
+    "node-telegram-bot-api": "^0.64.0"
+  }
 }
