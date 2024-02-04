@@ -1,0 +1,20 @@
+{
+  "name": "echofinder-backend",
+  "version": "1.0.0",
+  "description": "Backend for EchoFinder bots",
+  "main": "index.js",
+  "scripts": {
+    "install": "chmod +x ./scripts/install.sh && ./scripts/install.sh",
+    "start": "chmod +x ./scripts/start.sh && ./scripts/start.sh",
+    "dev": "chmod +x ./scripts/dev.sh && ./scripts/dev.sh"
+  },
+  "keywords": [
+    "backend",
+    "chroma",
+    "embedding",
+    "python",
+    "fastapi"
+  ],
+  "author": "Vishesh Arora",
+  "license": "MIT"
+}

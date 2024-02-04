@@ -2,6 +2,7 @@
   "name": "echofinder-telegram",
   "module": "src/index.ts",
   "type": "module",
+  "author": "Aditya Banerjee",
   "scripts": {
     "format": "prettier --write .",
     "start": "bun run src/index.ts",
