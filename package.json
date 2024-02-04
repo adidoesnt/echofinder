@@ -1,0 +1,26 @@
+{
+  "name": "echofinder",
+  "version": "0.0.1",
+  "description": "Echofinder's message search bots.",
+  "keywords": [
+    "telegram",
+    "whatsapp",
+    "chroma",
+    "embedding"
+  ],
+  "authors": [
+    {
+      "name": "Aditya Banerjee",
+      "email": "aditya_banerjee@icloud.com"
+    },
+    {
+      "name": "Vishesh Arora",
+      "email": "vishesharora@gmail.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adidoesnt/echofinder"
+  },
+  "license": "MIT"
+}
