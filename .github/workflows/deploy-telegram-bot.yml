@@ -13,18 +13,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Login to Docker Container Registry
-        run: docker login --username=_ --password=$HEROKU_API_KEY registry.heroku.com
+      - name: Login to Heroku Container Registry
+        run: docker login --username=${{ secrets.HEROKU_EMAIL }} --password=$HEROKU_API_KEY registry.heroku.com
         env:
-            HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-      - name: Build, Push and Release Docker container to Heroku 
-        uses: gonuit/heroku-docker-deploy@v1.3.3
-        with:
-          email: ${{ secrets.HEROKU_EMAIL }}
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-          dockerfile_directory: ./telegram-bot
-          dockerfile_name: Dockerfile
-          docker_options: "--no-cache"
-          process_type: web
+      - name: Build Docker image
+        run: cd telegram-bot && docker build -t registry.heroku.com/echofinder-telegram/web .
+
+      - name: Push Docker image to Heroku Container Registry
+        run: cd telegram-bot && docker push registry.heroku.com/echofinder-telegram/web
+
+      - name: Set environment variables
+        run: cd telegram-bot && heroku config:set TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} NODE_ENV=${{ env.NODE_ENV }} BACKEND_HOST=${{ env.BACKEND_HOST }} BACKEND_PORT=${{ env.BACKEND_PORT }} BACKEND_API_KEY=${{ secrets.BACKEND_API_KEY }} API_CLIENT_TIMEOUT=${{ env.API_CLIENT_TIMEOUT }} PLATFORM=${{ env.PLATFORM }} --app echofinder-telegram
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+      - name: Release Docker image on Heroku
+        run: cd telegram-bot && heroku container:release web --app echofinder-telegram
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
