@@ -4,6 +4,7 @@ import { Logger } from 'components/logger';
 import { MESSAGE } from 'constants/message';
 import { ERROR } from 'constants/error';
 import { ApiClient } from './apiClient';
+import { commands } from 'constants/command';
 
 const { TELEGRAM_BOT_TOKEN: token = '', NODE_ENV: env = 'DEV' } = process.env;
 
@@ -28,8 +29,12 @@ export class Bot {
 
     initialize(): void {
         this.logger.info('Initialising bot');
+        this.client.setMyCommands(commands);
         this.client.onText(/\/(start|help)/, (message: Message) => {
             this.help(message);
+        });
+        this.client.onText(/\/search/, (message: Message) => {
+            this.prompt(message);
         });
         this.client.onText(/\/search (.+)/, (message: Message) => {
             this.search(message);
@@ -71,8 +76,13 @@ export class Bot {
     }
 
     async help(message: Message) {
-        const { chat_id } = this.getMessageMetadata(message);
-        await this.sendMessage(chat_id, MESSAGE.HELP);
+        const { chat_id, message_id } = this.getMessageMetadata(message);
+        await this.sendMessage(chat_id, MESSAGE.HELP, message_id);
+    }
+
+    async prompt(message: Message) {
+        const { chat_id, message_id } = this.getMessageMetadata(message);
+        await this.sendMessage(chat_id, MESSAGE.PROMPT, message_id);
     }
 
     validateMesssage(message: Message): boolean {
