@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 import chromadb
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
-import logging
+from custom_logger import setup_custom_logger
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -11,6 +11,9 @@ app = FastAPI()
 # In-memory database
 client = chromadb.PersistentClient(path="/tmp")
 collection = client.get_or_create_collection(name="telegram_messages")
+
+# Initialize the custom logger
+logger = setup_custom_logger(__name__)
 
 # Pydantic model for data validation
 class TelegramMessage(BaseModel):
