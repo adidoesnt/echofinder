@@ -9,14 +9,14 @@ const { PORT: port, TELEGRAM_BOT_TOKEN: token = '' } = process.env;
 export class Server {
     static instance: Server;
     private app: Express;
-    private readonly port: number;
+    private readonly port: string | number;
     private logger: Log4js;
 
     private constructor() {
         this.logger = Logger.getLogger('Server');
         this.logger.info('Initialising server');
         this.app = express();
-        this.port = Number(port);
+        this.port = port ?? 3000;
         this.app.use(json());
         this.app.listen(this.port, () => {
             this.logger.info(`Server running on port ${this.port}`);
