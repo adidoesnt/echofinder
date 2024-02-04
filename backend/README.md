@@ -29,3 +29,9 @@
 ## Delete DB
 
 `python3 delete_db.py`
+
+## Deployment
+
+```
+docker compose up --build
+```
