@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 import chromadb
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -10,16 +10,17 @@ app = FastAPI()
 
 # In-memory database
 client = chromadb.PersistentClient(path="/tmp")
-collection = client.get_or_create_collection(name="telegram_messages")
+collection = client.get_or_create_collection(name="messages")
 
 # Initialize the custom logger
 logger = setup_custom_logger(__name__)
 
 # Pydantic model for data validation
-class TelegramMessage(BaseModel):
+class MessageInfo(BaseModel):
     message_id: str
     username: str
     firstname: str
+    message_type: Literal['whatsapp', 'telegram']
     lastname: Optional[str] = None
     sender_id: str
     chat_id: str
@@ -28,8 +29,8 @@ class TelegramMessage(BaseModel):
 
 
 
-@app.post("/messages/", response_model=List[TelegramMessage])
-async def upsert_messages(messages: List[TelegramMessage]):
+@app.post("/messages/", response_model=List[MessageInfo])
+async def upsert_messages(messages: List[MessageInfo]):
 
     ids = [msg.message_id for msg in messages]
     documents = [msg.message_content for msg in messages]
@@ -62,7 +63,13 @@ async def search_messages(search_string: str = Query(..., min_length=1)):
     return results
 
 
-@app.delete("/items/delete/", response_model=List[str])
-async def delete_items(message_ids: List[str]):
+@app.delete("/messages/delete/", response_model=List[str])
+async def delete_messages(message_ids: List[str]):
     collection.delete(ids=message_ids)
     return message_ids
+
+
+@app.delete("/messages/delete_all/")
+async def delete_messages():
+    client.delete_collection("messages")
+    return {"Deleted": "RESTART API NOW!!"}
