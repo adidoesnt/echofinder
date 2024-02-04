@@ -4,7 +4,7 @@ import type { Bot } from './bot';
 import { type Logger as Log4js } from 'log4js';
 import { Logger } from './logger';
 
-const { PORT: port = 3000, TELEGRAM_BOT_TOKEN: token = '' } = process.env;
+const { PORT: port, TELEGRAM_BOT_TOKEN: token = '' } = process.env;
 
 export class Server {
     static instance: Server;
