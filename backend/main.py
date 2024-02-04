@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 import chromadb
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -41,8 +41,14 @@ async def upsert_messages(messages: List[TelegramMessage]):
     return messages
 
 
+@app.get("/message/{message_id}") # response_model=TelegramMessage)
+async def get_message_by_id(message_id: str):
+    message = collection.get(message_id)
+    return message
 
-@app.get("/messages/search/") #, response_model=Dict[str, List])
+
+
+@app.get("/messages/search/") # TODO - Add response model
 async def search_messages(search_string: str = Query(..., min_length=1)):
     query_text = f"Who says this - {search_string}"
 
