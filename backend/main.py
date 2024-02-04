@@ -25,8 +25,8 @@ class TelegramMessage(BaseModel):
 
 
 
-@app.post("/items/", response_model=List[TelegramMessage])
-async def upsert_items(messages: List[TelegramMessage]):
+@app.post("/messages/", response_model=List[TelegramMessage])
+async def upsert_messages(messages: List[TelegramMessage]):
 
     ids = [msg.message_id for msg in messages]
     documents = [msg.message_content for msg in messages]
@@ -39,8 +39,8 @@ async def upsert_items(messages: List[TelegramMessage]):
 
 
 
-@app.get("/items/search/") #, response_model=Dict[str, List])
-async def search_items(search_string: str = Query(..., min_length=1)):
+@app.get("/messages/search/") #, response_model=Dict[str, List])
+async def search_messages(search_string: str = Query(..., min_length=1)):
     query_text = f"Who says this - {search_string}"
 
     results = collection.query(
