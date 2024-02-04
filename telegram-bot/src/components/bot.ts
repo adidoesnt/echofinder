@@ -34,6 +34,7 @@ export class Bot {
     }
 
     setWebhook(): void {
+        this.logger.info('Setting webhook');
         this.client.setWebHook(webhook_url + token);
     }
 
