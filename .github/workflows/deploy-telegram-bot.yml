@@ -12,9 +12,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-    
-      - name: Checkout subdirectory
-        run: cd telegram-bot
 
       - name: Build, Push and Release Docker container to Heroku 
         uses: gonuit/heroku-docker-deploy@v1.3.3
@@ -22,7 +19,7 @@ jobs:
           email: ${{ secrets.HEROKU_EMAIL }}
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-          dockerfile_directory: ../
+          dockerfile_directory: ./telegram-bot
           dockerfile_name: Dockerfile
           docker_options: "--no-cache"
           process_type: web
