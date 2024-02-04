@@ -49,3 +49,9 @@ async def search_items(search_string: str = Query(..., min_length=1)):
         )
     
     return results
+
+
+@app.delete("/items/delete/", response_model=List[str])
+async def delete_items(message_ids: List[str]):
+    collection.delete(ids=message_ids)
+    return message_ids
