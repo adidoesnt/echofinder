@@ -1,4 +1,4 @@
-import express, { type Express } from 'express';
+import express, { type Express, type Request, type Response } from 'express';
 import { json } from 'body-parser';
 import type { Bot } from './bot';
 import { type Logger as Log4js } from 'log4js';
@@ -18,6 +18,9 @@ export class Server {
         this.app = express();
         this.port = port ?? 3000;
         this.app.use(json());
+        this.app.get('/health', (_: Request, res: Response) => {
+            res.status(200).send('OK');
+        });
         this.app.listen(this.port, () => {
             this.logger.info(`Server running on port ${this.port}`);
         });
