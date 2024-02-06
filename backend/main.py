@@ -8,7 +8,7 @@ from custom_logger import setup_custom_logger
 # Initialize FastAPI app
 app = FastAPI()
 
-client = chromadb.HttpClient(host="chroma", port = 8000)
+client = chromadb.HttpClient(host="localhost", port = 8000)
 collection = client.get_or_create_collection(name="messages")
 
 # Initialize the custom logger
