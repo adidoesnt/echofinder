@@ -16,7 +16,7 @@ app = FastAPI()
 
 
 api_key = os.environ.get('API_KEY')
-api_key_header = APIKeyHeader(name="X-API-Key")
+api_key_header = APIKeyHeader(name="X-Api-Key")
 
 def get_api_key(api_key_header: str = Security(api_key_header)) -> str:
     if api_key_header == api_key:
@@ -26,7 +26,9 @@ def get_api_key(api_key_header: str = Security(api_key_header)) -> str:
         detail="Invalid or missing API Key",
     )
 
-client = chromadb.HttpClient(host=os.environ.get('CHROMA_HOST'), port = os.environ.get('CHROMA_PORT'))
+client = chromadb.HttpClient(host=os.environ.get('CHROMA_HOST'),
+                             port = os.environ.get('CHROMA_PORT'),
+                             headers={"X-Chroma-Token": os.environ.get('CHROMA_API_KEY')})
 collection = client.get_or_create_collection(name="messages")
 
 # Initialize the custom logger

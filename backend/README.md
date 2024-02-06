@@ -1,9 +1,18 @@
 # Backend Setup
 
 ## Environment variables
+
+### FastAPI (chroma client)
 * CHROMA_HOST
 * CHROMA_PORT
 * API_KEY
+* CHROMA_API_KEY
+
+### Chroma server
+* CHROMA_SERVER_AUTH_CREDENTIALS
+* CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER="chromadb.auth.token.TokenConfigServerAuthCredentialsProvider"
+* CHROMA_SERVER_AUTH_TOKEN_TRANSPORT_HEADER="X_CHROMA_TOKEN"
+* CHROMA_SERVER_AUTH_PROVIDER="chromadb.auth.token.TokenAuthServerProvider"
 
 ## Steps to Run (development):
 
