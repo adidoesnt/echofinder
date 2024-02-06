@@ -37,7 +37,7 @@ logger = setup_custom_logger(__name__)
 # Pydantic model for data validation
 class MessageInfo(BaseModel):
     message_id: str
-    username: str
+    username: Optional[str] = None
     firstname: str
     message_type: Literal['whatsapp', 'telegram']
     lastname: Optional[str] = None
