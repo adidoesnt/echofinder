@@ -1,0 +1,66 @@
+name: Deploy database to Heroku
+
+on:
+  push:
+    branches:
+      - deploy-database
+
+jobs:
+  deploy-database:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+
+      - name: Login to Heroku container registry
+        run: heroku container:login
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+      - name: Check if Heroku app exists
+        id: check_app
+        run: |
+          if heroku apps:info echofinder-database > /dev/null 2>&1; then
+              echo "App exists"
+              echo "::set-output name=exists::true"
+          else
+              echo "App does not exist"
+              echo "::set-output name=exists::false"
+          fi
+        env:
+          HEROKU_APP_NAME: echofinder-database
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+      - name: Create Heroku app
+        if: steps.check_app.outputs.exists == 'false'
+        run: heroku create echofinder-database
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+      - name: Build Docker image
+        run: cd database && docker build -t registry.heroku.com/echofinder-database/web .
+
+      - name: Push Docker image to Heroku container registry
+        run: cd database && docker push registry.heroku.com/echofinder-database/web
+
+      - name: Set environment variables
+        run: |
+          cd database && heroku config:set \
+          CHROMA_SERVER_AUTH_CREDENTIALS=${{ secrets.CHROMA_SERVER_AUTH_CREDENTIALS }} \
+          CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=${{ secrets.CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER }} \
+          CHROMA_SERVER_AUTH_PROVIDER=${{ secrets.CHROMA_SERVER_AUTH_PROVIDER }} \
+          CHROMA_SERVER_AUTH_TOKEN_TRANSPORT_HEADER=${{ secrets.CHROMA_SERVER_AUTH_TOKEN_TRANSPORT_HEADER }} \
+          PERSIST_DIRECTORY=${{ secrets.PERSIST_DIRECTORY }} \
+          --app echofinder-database
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+      - name: Release Docker image to Heroku
+        run: cd database && heroku container:release web --app echofinder-database
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}

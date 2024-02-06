@@ -136,9 +136,9 @@ export class Bot {
             this.getMessageMetadata(message);
         try {
             const query = message_content.replace(regex, '').trim();
-            console.log('query', query);
             const response = await this.apiClient.get('/messages/search', {
                 search_string: query,
+                chat_id,
             });
             const data = response;
             const { documents } = data;
