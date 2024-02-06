@@ -57,6 +57,8 @@ jobs:
                   CHROMA_SERVER_AUTH_TOKEN_TRANSPORT_HEADER=${{ secrets.CHROMA_SERVER_AUTH_TOKEN_TRANSPORT_HEADER }} \
                   PERSIST_DIRECTORY=${{ secrets.PERSIST_DIRECTORY }} \
                   --app echofinder-database
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
             - name: Release Docker image to Heroku
               run: cd database && heroku container:release web --app echofinder-database
@@ -114,6 +116,8 @@ jobs:
                   API_KEY=${{ secrets.BACKEND_API_KEY }} \
                   CHROMA_API_KEY=${{ secrets.CHROMA_SERVER_AUTH_CREDENTIALS }} \
                   --app echofinder-backend
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
             - name: Release Docker image to Heroku
               run: cd backend && heroku container:release web --app echofinder-backend
