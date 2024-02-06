@@ -1,0 +1,11 @@
+{
+  "name": "echofinder-db",
+  "version": "1.0.0",
+  "description": "Database for EchoFinder's message search bots",
+  "scripts": {
+    "build": "docker build -t echofinder-db:latest .",
+    "local": "docker run -p 8000:8000 --env-file .env echofinder-db:latest",
+    "prod": "docker run -p 8000:8000 echofinder-db:latest"
+  },
+  "license": "MIT"
+}
