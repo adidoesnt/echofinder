@@ -108,12 +108,12 @@ jobs:
 
             - name: Set environment variables
               run: |
-                  cd database && heroku config:set \
+                  cd backend && heroku config:set \
                   CHROMA_HOST=${{ secrets.CHROMA_HOST }} \
                   CHROMA_PORT=${{ secrets.CHROMA_PORT }} \
                   API_KEY=${{ secrets.BACKEND_API_KEY }} \
                   CHROMA_API_KEY=${{ secrets.CHROMA_SERVER_AUTH_CREDENTIALS }} \
-                  --app echofinder-database
+                  --app echofinder-backend
 
             - name: Release Docker image to Heroku
               run: cd backend && heroku container:release web --app echofinder-backend
