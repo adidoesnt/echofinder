@@ -2,7 +2,7 @@ FROM python:3.11
 
 WORKDIR /app
 
-COPY . .
+COPY . /app
 
 EXPOSE 8080
 

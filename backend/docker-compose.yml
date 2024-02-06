@@ -2,11 +2,9 @@ version: '3'
 
 services:
   chroma:
-    image: chromadb/chroma
+    build: ../database/.
     ports:
       - 8000:8000
-    volumes:
-      - /tmp/rando_data:/chroma/chroma
 
   web:
     build: .
