@@ -1,6 +1,11 @@
 # Backend Setup
 
-## Steps to Run:
+## Environment variables
+* CHROMA_HOST
+* CHROMA_PORT
+* API_KEY
+
+## Steps to Run (development):
 
 1. Navigate to the backend directory:
     ```
@@ -19,7 +24,12 @@
     uvicorn main:app --port 8080 --reload --reload-exclude venv/
     ```
 
-4. Once the server is running, open your web browser and go to:
+4. Run chroma server locally
+    ```
+    chroma run --path /tmp
+    ```
+
+5. Once the server is running, open your web browser and go to:
     ```
     http://127.0.0.1:8080/docs
     ```

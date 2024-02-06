@@ -26,7 +26,7 @@ def get_api_key(api_key_header: str = Security(api_key_header)) -> str:
         detail="Invalid or missing API Key",
     )
 
-client = chromadb.HttpClient(host="localhost", port = 8000)
+client = chromadb.HttpClient(host=os.environ.get('CHROMA_HOST'), port = os.environ.get('CHROMA_PORT'))
 collection = client.get_or_create_collection(name="messages")
 
 # Initialize the custom logger
