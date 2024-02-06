@@ -30,7 +30,7 @@ export class ApiClient {
         });
         this.client.interceptors.request.use(
             (config) => {
-                config.headers.Authorization = `Bearer ${apiKey}`;
+                config.headers['x-api-key'] = apiKey;
                 return config;
             },
             (error) => {
