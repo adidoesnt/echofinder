@@ -8,5 +8,5 @@ EXPOSE 8080
 
 RUN pip install -r requirements.txt
 
-CMD ["uvicorn", "main:app", "--port", "8080"]
+CMD uvicorn main:app --port $PORT
 
