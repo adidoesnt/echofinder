@@ -30,7 +30,7 @@ export class ApiClient {
         });
         this.client.interceptors.request.use(
             (config) => {
-                config.headers['x-api-key'] = apiKey;
+                config.headers['X-Api-Key'] = apiKey;
                 return config;
             },
             (error) => {
