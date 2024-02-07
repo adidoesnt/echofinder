@@ -4,7 +4,10 @@
   "type": "module",
   "scripts": {
     "start": "bun run src/index.ts",
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "build": "docker build -t echofinder-health:latest .",
+    "local": "docker run --env-file .env echofinder-health:latest",
+    "prod": "docker run echofinder-health:latest"
   },
   "devDependencies": {
     "@types/bun": "latest"
