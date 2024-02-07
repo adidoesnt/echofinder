@@ -12,7 +12,7 @@ const pingServers = async () => {
         try {
             await axios.get(server);
         } catch (error) {
-            if((error as AxiosError).response?.status) {
+            if ((error as AxiosError).response?.status) {
                 defaultLogger.info(`Server at ${server} is healthy.`);
             } else {
                 errorLogger.error(`Server at ${server} is down.`);
@@ -22,4 +22,10 @@ const pingServers = async () => {
     await Promise.all(promises);
 };
 
-setInterval(pingServers, pingInterval);
+defaultLogger.info(
+    `Starting health check for servers ${servers.join(", ")}...`
+);
+setTimeout(
+    () => pingServers().then(() => setInterval(pingServers, pingInterval)),
+    3000
+);
