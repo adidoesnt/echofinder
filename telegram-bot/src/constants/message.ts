@@ -3,6 +3,6 @@ export const MESSAGE = {
     PROMPT: 'Search usage: /search <search string>',
     NO_RESULTS: 'No results found. Try a different search string.',
     PROCESSING_UPDATE: 'Processing update',
-    FOUND: 'We found this message that we think matches your search! If it wasn\'t the message you were looking for, the buttons below correspond to the next 4 closest matches.',
-    CLOSE_MATCH: 'This message was also a close match to your query.'
+    FOUND: 'These messages were the closest matches for your query. Which one would you like to jump to?',
+    JUMP: '^'
 };

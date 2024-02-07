@@ -55,21 +55,29 @@ export class Bot {
         this.client.on('message', (message: Message) => {
             this.saveMessage(message);
         });
-        this.client.on('callback_query', (query) => {
-            const { data: stringifiedData, message } = query;
-            const { chat } = message!;
+        this.client.on('callback_query', async (query) => {
+            const { data: stringifiedData, message, from: queryFrom } = query;
+            const { chat, message_id: messageId } = message!;
+            const { id: queryFromId } = queryFrom;
             const { id: chatId } = chat;
             const data = JSON.parse(stringifiedData ?? '{}');
-            const { type, id: suggestionId } = data;
+            const { type, id: suggestionId, fromId } = data;
             switch (type) {
                 case 'see_suggestion':
-                    this.sendMessage(chatId, MESSAGE.CLOSE_MATCH, {
+                    this.sendMessage(chatId, MESSAGE.JUMP, {
                         reply_to_message_id: suggestionId,
                     });
                     break;
                 default:
                     this.logger.error(ERROR.INVALID_CALLBACK_QUERY);
                     return;
+            }
+            if (queryFromId === Number(fromId)) {
+                try {
+                    await this.client.deleteMessage(chatId, messageId);
+                } catch (error) {
+                    this.logger.error(error);
+                }
             }
         });
         this.logger.info('Bot initialised successfully');
@@ -152,7 +160,7 @@ export class Bot {
         }
     }
 
-    getInlineKeyboard(messageIds: number[]): Array<InlineKeyboardButton> {
+    getInlineKeyboard(messageIds: number[], fromId: string | number): Array<InlineKeyboardButton> {
         return messageIds.map((id: number, i: number) => {
             const index = i + 1;
             return {
@@ -160,9 +168,23 @@ export class Bot {
                 callback_data: JSON.stringify({
                     type: 'see_suggestion',
                     id,
+                    fromId
                 }),
             };
         });
+    }
+
+    getResultString(documents: string[]): string {
+        let result = [MESSAGE.FOUND];
+        result.push(
+            documents
+                .map((doc: string, i: number) => {
+                    const index = i + 1;
+                    return `${index}. ${doc}`;
+                })
+                .join('\n'),
+        );
+        return result.join('\n');
     }
 
     async search(message: Message): Promise<void> {
@@ -171,6 +193,7 @@ export class Bot {
             chat_id: chatId,
             message_content: messageContent,
             message_id: messageId,
+            sender_id: fromId
         } = this.getMessageMetadata(message);
         try {
             const query = messageContent.replace(regex, '').trim();
@@ -179,13 +202,13 @@ export class Bot {
                 chat_id: chatId,
             });
             const data = response;
-            const { ids: foundMessageIds } = data;
-            const foundMessageId = foundMessageIds?.shift();
-            if (foundMessageId) {
+            const { ids: foundMessageIds, documents } = data;
+            if (documents?.length > 0) {
                 const inlineKeyboardMarkup =
-                    this.getInlineKeyboard(foundMessageIds);
-                await this.sendMessage(chatId, MESSAGE.FOUND, {
-                    reply_to_message_id: foundMessageId,
+                    this.getInlineKeyboard(foundMessageIds, fromId);
+                const reply = this.getResultString(documents);
+                await this.sendMessage(chatId, reply, {
+                    reply_to_message_id: messageId,
                     reply_markup: {
                         inline_keyboard: [inlineKeyboardMarkup],
                     },
