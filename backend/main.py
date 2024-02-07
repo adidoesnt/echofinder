@@ -37,7 +37,7 @@ logger = setup_custom_logger(__name__)
 # Pydantic model for data validation
 class MessageInfo(BaseModel):
     message_id: str
-    username: str
+    username: Optional[str] = None
     firstname: str
     message_type: Literal['whatsapp', 'telegram']
     lastname: Optional[str] = None
@@ -69,11 +69,12 @@ async def get_message_by_id(message_id: str, api_key: str = Security(get_api_key
 
 
 @app.get("/messages/search/") # TODO - Add response model
-async def search_messages(search_string: str = Query(..., min_length=1), api_key: str = Security(get_api_key)):
+async def search_messages(search_string: str = Query(..., min_length=1), chat_id: str = Query(..., min_length=1), api_key: str = Security(get_api_key)):
     query_text = f"Who says this - {search_string}"
 
     results = collection.query(
         query_texts=query_text,
+        where={"chat_id": chat_id},
         n_results=5
         )
     

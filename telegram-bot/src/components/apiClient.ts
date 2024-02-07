@@ -3,6 +3,7 @@ import { type Logger as Log4js } from 'log4js';
 import { Logger } from 'components/logger';
 
 const {
+    NODE_ENV: env = 'DEV',
     BACKEND_HOST: host = '127.0.0.1',
     BACKEND_PORT: port = 8080,
     API_CLIENT_TIMEOUT: timeout = 10000,
@@ -15,7 +16,7 @@ export class ApiClient {
     private logger: Log4js;
 
     static getBaseUrl() {
-        return `http://${host}:${port}`;
+        return env === 'DEV' ? `http://${host}:${port}` : `https://${host}`;
     }
 
     private constructor() {
