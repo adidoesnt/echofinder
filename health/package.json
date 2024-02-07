@@ -2,6 +2,10 @@
   "name": "ping",
   "module": "src/index.ts",
   "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun run --hot src/index.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -9,8 +13,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@types/ping": "^0.4.4",
-    "log4js": "^6.9.1",
-    "ping": "^0.4.4"
+    "axios": "^1.6.7",
+    "log4js": "^6.9.1"
   }
 }

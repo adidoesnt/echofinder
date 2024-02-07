@@ -13,7 +13,7 @@ log4js.configure({
     },
     categories: {
         default: { appenders: ["console", "file"], level: "info" },
-        error: { appenders: ["error", "file"], level: "error" },
+        error: { appenders: ["console", "error", "file"], level: "error" },
     },
 });
 
