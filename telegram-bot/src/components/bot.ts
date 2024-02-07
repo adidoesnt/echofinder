@@ -180,10 +180,10 @@ export class Bot {
             });
             const data = response;
             const { ids: foundMessageIds } = data;
-            const foundMessageId = foundMessageIds?.shift();
+            const foundMessageId = foundMessageIds[0]?.shift();
             if (foundMessageId) {
                 const inlineKeyboardMarkup =
-                    this.getInlineKeyboard(foundMessageIds);
+                    this.getInlineKeyboard(foundMessageIds[0]);
                 await this.sendMessage(chatId, MESSAGE.FOUND, {
                     reply_to_message_id: foundMessageId,
                     reply_markup: {
