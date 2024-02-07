@@ -105,15 +105,17 @@ export class Bot {
         chatId: string,
         message: string,
         message_id?: string,
-    ): Promise<void> {
+    ): Promise<Message> {
         this.logger.info(`Sending message to chat ${chatId}`, { message });
+        let result;
         if (message_id) {
-            this.client.sendMessage(chatId, message, {
+            result = this.client.sendMessage(chatId, message, {
                 reply_to_message_id: Number(message_id),
             });
         } else {
-            this.client.sendMessage(chatId, message);
+            result = this.client.sendMessage(chatId, message);
         }
+        return result;
     }
 
     async saveMessage(message: Message): Promise<void> {
@@ -132,27 +134,25 @@ export class Bot {
 
     async search(message: Message): Promise<void> {
         const regex = new RegExp(/\/search/);
-        const { chat_id, message_content, message_id } =
-            this.getMessageMetadata(message);
+        const {
+            chat_id: chatId,
+            message_content: messageContent,
+            message_id: messageId,
+        } = this.getMessageMetadata(message);
         try {
-            const query = message_content.replace(regex, '').trim();
+            const query = messageContent.replace(regex, '').trim();
             const response = await this.apiClient.get('/messages/search', {
                 search_string: query,
-                chat_id,
+                chatId,
             });
             const data = response;
-            const { documents } = data;
-            const results = documents
-                .map((doc: string, i: number) => {
-                    const index = i + 1;
-                    return `${index}. ${doc}`;
-                })
-                .join('\n');
-            if (!results || results.length === 0) {
-                await this.sendMessage(chat_id, MESSAGE.NO_RESULTS, message_id);
-                return;
+            const { ids: foundMessageIds } = data;
+            const foundMessageId = foundMessageIds?.shift();
+            if (foundMessageId) {
+                await this.sendMessage(chatId, MESSAGE.FOUND, foundMessageId);
+            } else {
+                await this.sendMessage(chatId, MESSAGE.NO_RESULTS, messageId);
             }
-            this.sendMessage(chat_id, results, message_id);
         } catch (error) {
             this.logger.error(error);
         }
