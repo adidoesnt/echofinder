@@ -1,0 +1,16 @@
+{
+  "name": "ping",
+  "module": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/ping": "^0.4.4",
+    "log4js": "^6.9.1",
+    "ping": "^0.4.4"
+  }
+}
