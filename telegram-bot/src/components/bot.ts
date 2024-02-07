@@ -1,5 +1,9 @@
 import { type Logger as Log4js } from 'log4js';
-import Client, { type Message } from 'node-telegram-bot-api';
+import Client, {
+    type InlineKeyboardButton,
+    type Message,
+    type SendMessageOptions,
+} from 'node-telegram-bot-api';
 import { Logger } from 'components/logger';
 import { MESSAGE } from 'constants/message';
 import { ERROR } from 'constants/error';
@@ -51,6 +55,23 @@ export class Bot {
         this.client.on('message', (message: Message) => {
             this.saveMessage(message);
         });
+        this.client.on('callback_query', (query) => {
+            const { data: stringifiedData, message } = query;
+            const { chat } = message!;
+            const { id: chatId } = chat;
+            const data = JSON.parse(stringifiedData ?? '{}');
+            const { type, id: suggestionId } = data;
+            switch (type) {
+                case 'see_suggestion':
+                    this.sendMessage(chatId, MESSAGE.CLOSE_MATCH, {
+                        reply_to_message_id: suggestionId,
+                    });
+                    break;
+                default:
+                    this.logger.error(ERROR.INVALID_CALLBACK_QUERY);
+                    return;
+            }
+        });
         this.logger.info('Bot initialised successfully');
     }
 
@@ -87,12 +108,16 @@ export class Bot {
 
     async help(message: Message) {
         const { chat_id, message_id } = this.getMessageMetadata(message);
-        await this.sendMessage(chat_id, MESSAGE.HELP, message_id);
+        await this.sendMessage(chat_id, MESSAGE.HELP, {
+            reply_to_message_id: message_id,
+        });
     }
 
     async prompt(message: Message) {
         const { chat_id, message_id } = this.getMessageMetadata(message);
-        await this.sendMessage(chat_id, MESSAGE.PROMPT, message_id);
+        await this.sendMessage(chat_id, MESSAGE.PROMPT, {
+            reply_to_message_id: message_id,
+        });
     }
 
     validateMesssage(message: Message): boolean {
@@ -102,18 +127,15 @@ export class Bot {
     }
 
     async sendMessage(
-        chatId: string,
+        chatId: string | number,
         message: string,
-        message_id?: string,
-    ): Promise<void> {
-        this.logger.info(`Sending message to chat ${chatId}`, { message });
-        if (message_id) {
-            this.client.sendMessage(chatId, message, {
-                reply_to_message_id: Number(message_id),
-            });
-        } else {
-            this.client.sendMessage(chatId, message);
-        }
+        options?: Partial<SendMessageOptions>,
+    ): Promise<Message> {
+        this.logger.info(`Sending message to chat ${chatId}`, {
+            message,
+            options,
+        });
+        return this.client.sendMessage(chatId, message, options);
     }
 
     async saveMessage(message: Message): Promise<void> {
@@ -130,29 +152,49 @@ export class Bot {
         }
     }
 
+    getInlineKeyboard(messageIds: number[]): Array<InlineKeyboardButton> {
+        return messageIds.map((id: number, i: number) => {
+            const index = i + 1;
+            return {
+                text: `${index}`,
+                callback_data: JSON.stringify({
+                    type: 'see_suggestion',
+                    id,
+                }),
+            };
+        });
+    }
+
     async search(message: Message): Promise<void> {
         const regex = new RegExp(/\/search/);
-        const { chat_id, message_content, message_id } =
-            this.getMessageMetadata(message);
+        const {
+            chat_id: chatId,
+            message_content: messageContent,
+            message_id: messageId,
+        } = this.getMessageMetadata(message);
         try {
-            const query = message_content.replace(regex, '').trim();
+            const query = messageContent.replace(regex, '').trim();
             const response = await this.apiClient.get('/messages/search', {
                 search_string: query,
-                chat_id,
+                chat_id: chatId,
             });
             const data = response;
-            const { documents } = data;
-            const results = documents
-                .map((doc: string, i: number) => {
-                    const index = i + 1;
-                    return `${index}. ${doc}`;
-                })
-                .join('\n');
-            if (!results || results.length === 0) {
-                await this.sendMessage(chat_id, MESSAGE.NO_RESULTS, message_id);
-                return;
+            const { ids: foundMessageIds } = data;
+            const foundMessageId = foundMessageIds[0]?.shift();
+            if (foundMessageId) {
+                const inlineKeyboardMarkup =
+                    this.getInlineKeyboard(foundMessageIds[0]);
+                await this.sendMessage(chatId, MESSAGE.FOUND, {
+                    reply_to_message_id: foundMessageId,
+                    reply_markup: {
+                        inline_keyboard: [inlineKeyboardMarkup],
+                    },
+                });
+            } else {
+                await this.sendMessage(chatId, MESSAGE.NO_RESULTS, {
+                    reply_to_message_id: messageId,
+                });
             }
-            this.sendMessage(chat_id, results, message_id);
         } catch (error) {
             this.logger.error(error);
         }
