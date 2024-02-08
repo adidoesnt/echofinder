@@ -64,8 +64,27 @@ jobs:
               env:
                   HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-    deploy-telegram-bot:
+    test-telegram-bot:
         needs: deploy-backend
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Install bun
+              uses: oven-sh/setup-bun@v1
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies
+              run: cd telegram-bot && bun install
+
+            - name: Run tests
+              run: cd telegram-bot && bun test
+
+    deploy-telegram-bot:
+        needs: test-telegram-bot
         runs-on: ubuntu-latest
 
         steps:
