@@ -176,7 +176,7 @@ jobs:
               run: |
                   cd health && heroku config:set \
                   SERVER_LIST=${{ secrets.TELEGRAM_BOT_TOKEN }} \
-                  PING_INTERVAL=${{ secrets.TELEGRAM_BOT_WEBHOOK_URL }}
+                  PING_INTERVAL=${{ secrets.TELEGRAM_BOT_WEBHOOK_URL }} \
                   --app echofinder-health
               env:
                   HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
