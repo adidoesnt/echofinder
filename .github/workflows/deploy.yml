@@ -1,129 +1,187 @@
 name: Deploy to Heroku
 
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
 
 jobs:
-  deploy-backend:
-    runs-on: ubuntu-latest
+    deploy-backend:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
 
-      - name: Install Heroku CLI
-        run: |
-          curl https://cli-assets.heroku.com/install.sh | sh
+            - name: Install Heroku CLI
+              run: |
+                  curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Login to Heroku container registry
-        run: heroku container:login
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+            - name: Login to Heroku container registry
+              run: heroku container:login
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-      - name: Check if Heroku app exists
-        id: check_app
-        run: |
-          if heroku apps:info echofinder-backend > /dev/null 2>&1; then
-              echo "App exists"
-              echo "::set-output name=exists::true"
-          else
-              echo "App does not exist"
-              echo "::set-output name=exists::false"
-          fi
-        env:
-          HEROKU_APP_NAME: echofinder-backend
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+            - name: Check if Heroku app exists
+              id: check_app
+              run: |
+                  if heroku apps:info echofinder-backend > /dev/null 2>&1; then
+                      echo "App exists"
+                      echo "::set-output name=exists::true"
+                  else
+                      echo "App does not exist"
+                      echo "::set-output name=exists::false"
+                  fi
+              env:
+                  HEROKU_APP_NAME: echofinder-backend
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-      - name: Create Heroku app
-        if: steps.check_app.outputs.exists == 'false'
-        run: heroku create echofinder-backend
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+            - name: Create Heroku app
+              if: steps.check_app.outputs.exists == 'false'
+              run: heroku create echofinder-backend
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-      - name: Build Docker image
-        run: cd backend && docker build -t registry.heroku.com/echofinder-backend/web .
+            - name: Build Docker image
+              run: cd backend && docker build -t registry.heroku.com/echofinder-backend/web .
 
-      - name: Push Docker image to Heroku container registry
-        run: cd backend && docker push registry.heroku.com/echofinder-backend/web
+            - name: Push Docker image to Heroku container registry
+              run: cd backend && docker push registry.heroku.com/echofinder-backend/web
 
-      - name: Set environment variables
-        run: |
-          cd backend && heroku config:set \
-          CHROMA_HOST=${{ secrets.CHROMA_HOST }} \
-          CHROMA_PORT=${{ secrets.CHROMA_PORT }} \
-          API_KEY=${{ secrets.BACKEND_API_KEY }} \
-          CHROMA_API_KEY=${{ secrets.CHROMA_SERVER_AUTH_CREDENTIALS }} \
-          --app echofinder-backend
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+            - name: Set environment variables
+              run: |
+                  cd backend && heroku config:set \
+                  CHROMA_HOST=${{ secrets.CHROMA_HOST }} \
+                  CHROMA_PORT=${{ secrets.CHROMA_PORT }} \
+                  API_KEY=${{ secrets.BACKEND_API_KEY }} \
+                  CHROMA_API_KEY=${{ secrets.CHROMA_SERVER_AUTH_CREDENTIALS }} \
+                  --app echofinder-backend
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-      - name: Release Docker image to Heroku
-        run: cd backend && heroku container:release web --app echofinder-backend
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+            - name: Release Docker image to Heroku
+              run: cd backend && heroku container:release web --app echofinder-backend
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-  deploy-telegram-bot:
-    needs: deploy-backend
-    runs-on: ubuntu-latest
+    deploy-telegram-bot:
+        needs: deploy-backend
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
 
-      - name: Install Heroku CLI
-        run: |
-          curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
+            - name: Install Heroku CLI
+              run: |
+                  curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
 
-      - name: Login to Heroku Container Registry
-        run: heroku container:login
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+            - name: Login to Heroku Container Registry
+              run: heroku container:login
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-      - name: Check if Heroku app exists
-        id: check_app
-        run: |
-          if heroku apps:info echofinder-telegram > /dev/null 2>&1; then
-            echo "App exists"
-            echo "::set-output name=exists::true"
-          else
-            echo "App does not exist"
-            echo "::set-output name=exists::false"
-          fi
-        env:
-          HEROKU_APP_NAME: echofinder-telegram
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+            - name: Check if Heroku app exists
+              id: check_app
+              run: |
+                  if heroku apps:info echofinder-telegram > /dev/null 2>&1; then
+                    echo "App exists"
+                    echo "::set-output name=exists::true"
+                  else
+                    echo "App does not exist"
+                    echo "::set-output name=exists::false"
+                  fi
+              env:
+                  HEROKU_APP_NAME: echofinder-telegram
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-      - name: Create Heroku app
-        if: steps.check_app.outputs.exists == 'false'
-        run: heroku apps:create echofinder-telegram
-        env:
-          HEROKU_APP_NAME: echofinder-telegram
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+            - name: Create Heroku app
+              if: steps.check_app.outputs.exists == 'false'
+              run: heroku apps:create echofinder-telegram
+              env:
+                  HEROKU_APP_NAME: echofinder-telegram
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-      - name: Build Docker image
-        run: cd telegram-bot && docker build -t registry.heroku.com/echofinder-telegram/web .
+            - name: Build Docker image
+              run: cd telegram-bot && docker build -t registry.heroku.com/echofinder-telegram/web .
 
-      - name: Push Docker image to Heroku Container Registry
-        run: cd telegram-bot && docker push registry.heroku.com/echofinder-telegram/web
+            - name: Push Docker image to Heroku Container Registry
+              run: cd telegram-bot && docker push registry.heroku.com/echofinder-telegram/web
 
-      - name: Set environment variables
-        run: |
-          cd telegram-bot && heroku config:set \
-          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} \
-          TELEGRAM_BOT_WEBHOOK_URL=${{ secrets.TELEGRAM_BOT_WEBHOOK_URL }} \
-          NODE_ENV=${{ secrets.NODE_ENV }} \
-          BACKEND_HOST=${{ secrets.BACKEND_HOST }} \
-          BACKEND_PORT=${{ secrets.BACKEND_PORT }} \
-          BACKEND_API_KEY=${{ secrets.BACKEND_API_KEY }} \
-          API_CLIENT_TIMEOUT=${{ secrets.API_CLIENT_TIMEOUT }} \
-          PLATFORM=${{ secrets.PLATFORM }} \
-          --app echofinder-telegram
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+            - name: Set environment variables
+              run: |
+                  cd telegram-bot && heroku config:set \
+                  TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} \
+                  TELEGRAM_BOT_WEBHOOK_URL=${{ secrets.TELEGRAM_BOT_WEBHOOK_URL }} \
+                  NODE_ENV=${{ secrets.NODE_ENV }} \
+                  BACKEND_HOST=${{ secrets.BACKEND_HOST }} \
+                  BACKEND_PORT=${{ secrets.BACKEND_PORT }} \
+                  BACKEND_API_KEY=${{ secrets.BACKEND_API_KEY }} \
+                  API_CLIENT_TIMEOUT=${{ secrets.API_CLIENT_TIMEOUT }} \
+                  PLATFORM=${{ secrets.PLATFORM }} \
+                  --app echofinder-telegram
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
-      - name: Release Docker image on Heroku
-        run: cd telegram-bot && heroku container:release web --app echofinder-telegram
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+            - name: Release Docker image on Heroku
+              run: cd telegram-bot && heroku container:release web --app echofinder-telegram
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+    deploy-health:
+        needs: deploy-telegram-bot
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Install Heroku CLI
+              run: |
+                  curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
+
+            - name: Login to Heroku Container Registry
+              run: heroku container:login
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+            - name: Check if Heroku app exists
+              id: check_app
+              run: |
+                  if heroku apps:info echofinder-health > /dev/null 2>&1; then
+                    echo "App exists"
+                    echo "::set-output name=exists::true"
+                  else
+                    echo "App does not exist"
+                    echo "::set-output name=exists::false"
+                  fi
+              env:
+                  HEROKU_APP_NAME: echofinder-health
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+            - name: Create Heroku app
+              if: steps.check_app.outputs.exists == 'false'
+              run: heroku apps:create echofinder-health
+              env:
+                  HEROKU_APP_NAME: echofinder-health
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+            - name: Build Docker image
+              run: cd health && docker build -t registry.heroku.com/echofinder-health/worker .
+
+            - name: Push Docker image to Heroku Container Registry
+              run: cd health && docker push registry.heroku.com/echofinder-health/worker
+
+            - name: Set environment variables
+              run: |
+                  cd health && heroku config:set \
+                  SERVER_LIST=${{ secrets.TELEGRAM_BOT_TOKEN }} \
+                  PING_INTERVAL=${{ secrets.TELEGRAM_BOT_WEBHOOK_URL }}
+                  --app echofinder-health
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+
+            - name: Release Docker image on Heroku
+              run: cd health && heroku container:release worker --app echofinder-health
+              env:
+                  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
