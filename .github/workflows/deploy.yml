@@ -194,8 +194,8 @@ jobs:
             - name: Set environment variables
               run: |
                   cd health && heroku config:set \
-                  SERVER_LIST=${{ secrets.TELEGRAM_BOT_TOKEN }} \
-                  PING_INTERVAL=${{ secrets.TELEGRAM_BOT_WEBHOOK_URL }} \
+                  SERVER_LIST=${{ secrets.SERVER_LIST }} \
+                  PING_INTERVAL=${{ secrets.PING_INTERVAL }} \
                   --app echofinder-health
               env:
                   HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
